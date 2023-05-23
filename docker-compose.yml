@@ -1,0 +1,62 @@
+version: '3'
+services:
+  #PHP Service
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: php_tutorial
+    container_name: apptutorial
+    restart: unless-stopped
+    tty: true
+    environment:
+      SERVICE_NAME: app
+      SERVICE_TAGS: dev
+    working_dir: /var/www
+    volumes:
+      - ./src:/var/www
+      - ./php/local.ini:/usr/local/etc/php/conf.d/local.ini
+    networks:
+      - laravel
+  #Nginx Service
+  webserver:
+    image: nginx:alpine
+    container_name: webservertutorial
+    restart: unless-stopped
+    tty: true
+    ports:
+      - "200:80"
+    volumes:
+      - ./src:/var/www
+      - ./nginx/conf.d/:/etc/nginx/conf.d/
+    networks:
+      - laravel
+
+  #MySQL Service
+  db:
+    image: mysql
+    container_name: dbtutorial
+    restart: always
+    tty: true
+    ports:
+      - "40000:3306"
+    environment:
+      # MYSQL_DATABASE: cgl
+      # MYSQL_USER: root
+      MYSQL_PASSWORD: dockertutorial
+      MYSQL_ROOT_PASSWORD: dockertutorial
+      SERVICE_TAGS: dev
+      SERVICE_NAME: mysql
+    volumes:
+      - ./mysql:/var/lib/mysql
+    networks:
+      - laravel
+
+  #Docker Networks
+networks:
+  laravel:
+    driver: bridge
+  #Volumes
+volumes:
+  lbdata:
+    driver: local
